@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Swordsman : MonoBehaviour
+public class Swordsman : MonoBehaviour, IKillable
 {
     Animator animator;
     float sx, cx;
@@ -25,7 +25,7 @@ public class Swordsman : MonoBehaviour
     void Start()
     {
         contactFilter.useTriggers = false;
-        contactFilter.SetLayerMask(Physics2D.GetLayerCollisionMask(gameObject.layer) & LayerMask.NameToLayer("Dmg"));
+        contactFilter.SetLayerMask(/*Physics2D.GetLayerCollisionMask(gameObject.layer) & */~Physics2D.GetLayerCollisionMask(LayerMask.NameToLayer("Walls")));
         contactFilter.useLayerMask = true;
         sx = transform.localScale.x;
         animator = GetComponent<Animator>();
@@ -40,7 +40,8 @@ public class Swordsman : MonoBehaviour
             movement();
             animator.SetBool("Recovered", true);
         }
-        else animator.SetBool("Recovered", false);
+        else
+            animator.SetBool("Recovered", false);
         direction();
         if (sliceing) sliceing = false;
         else setNoSlice();
@@ -78,13 +79,19 @@ public class Swordsman : MonoBehaviour
 
     void movement()
     {
+        v.Normalize();
+
         animator.SetBool("MoveV", v.x != 0);
         animator.SetBool("MoveUp", v.y > 0);
         animator.SetBool("MoveDown", v.y < 0);
 
         mirrored = v.x < 0;
 
-        if (rb2d.Cast(v, contactFilter, hitBuffer, v.magnitude) <= 0) rb2d.position += v * speed;
+        if (rb2d.Cast(v, contactFilter, hitBuffer, v.magnitude * speed * 5f) <= 0) rb2d.position += v * speed;
     }
 
+    public void damage(float dmg)
+    {
+        
+    }
 }

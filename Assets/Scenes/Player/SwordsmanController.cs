@@ -17,9 +17,9 @@ public class SwordsmanController : MonoBehaviour
     void Update()
     {
         time++;
-        if ((time / 30) % 2 == 0) body.move(new Vector2(1, 0));
+        if ((time / 100) % 2 == 0) body.move(new Vector2(1, 0));
         else body.move(new Vector2(-1, 0));
-        if (Random.Range(0, 100) == 0) body.slice(new Vector2(1, 0));
+        if (Random.Range(0, 300) == 0) body.slice(new Vector2(1, 0));
         //else body.setNoSlice();
     }
 }
