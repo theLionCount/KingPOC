@@ -10,13 +10,19 @@ public class Swordsman : MonoBehaviour, IKillable
     protected RaycastHit2D[] hitBuffer = new RaycastHit2D[16];
     protected List<RaycastHit2D> hitBufferList = new List<RaycastHit2D>(16);
     protected Rigidbody2D rb2d;
-    bool lmb;
     bool mirrored;
     bool sliceing;
     Vector2 v = Vector2.zero;
 
     public float speed;
+    float stunned;
+    Vector2 knockbackV;
+    public float friction = 0.9f;
+    public float minKBV = 0.005f;
 
+    Color defaultColor;
+    SpriteRenderer renderer;
+    
     void OnEnable()
     {
         rb2d = GetComponent<Rigidbody2D>();
@@ -25,38 +31,57 @@ public class Swordsman : MonoBehaviour, IKillable
     void Start()
     {
         contactFilter.useTriggers = false;
-        contactFilter.SetLayerMask(/*Physics2D.GetLayerCollisionMask(gameObject.layer) & */~Physics2D.GetLayerCollisionMask(LayerMask.NameToLayer("Walls")));
+        contactFilter.SetLayerMask(~Physics2D.GetLayerCollisionMask(LayerMask.NameToLayer("Walls")));
         contactFilter.useLayerMask = true;
         sx = transform.localScale.x;
         animator = GetComponent<Animator>();
+        renderer = gameObject.GetComponent<SpriteRenderer>();
+        defaultColor = renderer.color;
     }
 
     // Update is called once per frame
     
-    void Update()
+    void FixedUpdate()
     {
-        if (!animator.GetCurrentAnimatorStateInfo(0).IsTag("slice"))
+        if (stunned > 0)
         {
-            movement();
-            animator.SetBool("Recovered", true);
+            stunned--;
+            renderer.color = (int)(stunned) % 2 == 0 ? defaultColor : Color.gray;
+            animator.SetBool("Stunned", true);
+            if (knockbackV.magnitude > minKBV) knockbackV *= friction;
+            else knockbackV = Vector2.zero;
+            collidedMove(knockbackV);
         }
         else
-            animator.SetBool("Recovered", false);
+        {
+            renderer.material.color = defaultColor;
+            animator.SetBool("Stunned", false);
+            if (!animator.GetCurrentAnimatorStateInfo(0).IsTag("slice"))
+            {
+                movement();
+                animator.SetBool("Recovered", true);
+            }
+            else
+                animator.SetBool("Recovered", false);         
+            if (sliceing) sliceing = false;
+            else setNoSlice();
+        }
         direction();
-        if (sliceing) sliceing = false;
-        else setNoSlice();
     }
 
     public void slice(Vector2 dir)
     {
-        if (dir.x != 0)
+        if (stunned <= 0)
         {
-            animator.SetBool("SliceV", true);
-            mirrored = dir.x < 0;
+            if (dir.x != 0)
+            {
+                animator.SetBool("SliceV", true);
+                mirrored = dir.x < 0;
+            }
+            else if (dir.y > 0) animator.SetBool("SliceUp", true);
+            else animator.SetBool("SliceDown", true);
+            sliceing = true;
         }
-        else if (dir.y > 0) animator.SetBool("SliceUp", true);
-        else animator.SetBool("SliceDown", true);
-        sliceing = true;
     }
 
     public void setNoSlice()
@@ -87,11 +112,21 @@ public class Swordsman : MonoBehaviour, IKillable
 
         mirrored = v.x < 0;
 
-        if (rb2d.Cast(v, contactFilter, hitBuffer, v.magnitude * speed * 5f) <= 0) rb2d.position += v * speed;
+        collidedMove(v * speed);
     }
 
-    public void damage(float dmg)
+    public void damage(float dmg, float stun, Vector2 dir, float knockback)
     {
-        
+        stunned = stun;
+        knockbackV = dir.normalized * knockback;
+
+    }
+
+    public void collidedMove(Vector2 to)
+    {
+        Vector2 horizontal = new Vector2(to.x, 0);
+        Vector2 vertical = new Vector2(0, to.y);
+        if (rb2d.Cast(horizontal, contactFilter, hitBuffer, horizontal.magnitude * 3f) <= 0) rb2d.position += horizontal;
+        if (rb2d.Cast(vertical, contactFilter, hitBuffer, horizontal.magnitude * 3f) <= 0) rb2d.position += vertical;
     }
 }

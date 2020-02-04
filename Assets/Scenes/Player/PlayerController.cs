@@ -13,7 +13,7 @@ public class PlayerController : MonoBehaviour
         body = gameObject.GetComponent<Swordsman>();
     }
 
-    void Update()
+    void FixedUpdate()
     {
         var v = Vector2.zero;
         if (Input.GetKey(KeyCode.W)) v.y = 1f;
