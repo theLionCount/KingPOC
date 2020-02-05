@@ -20,6 +20,8 @@ public class Swordsman : MonoBehaviour, IKillable
     public float friction = 0.9f;
     public float minKBV = 0.005f;
 
+    public float health;
+
     Color defaultColor;
     SpriteRenderer renderer;
     
@@ -54,17 +56,25 @@ public class Swordsman : MonoBehaviour, IKillable
         }
         else
         {
+
             renderer.material.color = defaultColor;
             animator.SetBool("Stunned", false);
-            if (!animator.GetCurrentAnimatorStateInfo(0).IsTag("slice"))
+            if (health > 0)
             {
-                movement();
-                animator.SetBool("Recovered", true);
+                if (!animator.GetCurrentAnimatorStateInfo(0).IsTag("slice"))
+                {
+                    movement();
+                    animator.SetBool("Recovered", true);
+                }
+                else
+                    animator.SetBool("Recovered", false);
+                if (sliceing) sliceing = false;
+                else setNoSlice();
             }
             else
-                animator.SetBool("Recovered", false);         
-            if (sliceing) sliceing = false;
-            else setNoSlice();
+            {
+                Destroy(gameObject);
+            }
         }
         direction();
     }
@@ -119,7 +129,7 @@ public class Swordsman : MonoBehaviour, IKillable
     {
         stunned = stun;
         knockbackV = dir.normalized * knockback;
-
+        health -= dmg;
     }
 
     public void collidedMove(Vector2 to)
