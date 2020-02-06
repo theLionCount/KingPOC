@@ -8,9 +8,13 @@ public class OutsideCreator : MonoBehaviour
 {
     public Tile[] grassToDirtTiles;
     public Tile[] grassToDarkGrassTiles;
+    public Tile[] grassToWaterTiles;
     public Tile[] specGlass;
     public Tile[] flowers;
+    public Tile[] treeTiles;
+    public Tile treeTrunk;
     Tilemap tilemap;
+    Tilemap FGTileMap;
 
     public int w, h;
     public int flowerNum;
@@ -22,7 +26,8 @@ public class OutsideCreator : MonoBehaviour
     {
         gtdm = new byte[w, h];
         roadmap = new bool[w, h];
-        tilemap = GetComponent<Tilemap>();
+        tilemap = GameObject.Find("Tilemap").GetComponent<Tilemap>();
+        FGTileMap = GameObject.Find("FGTilemap").GetComponent<Tilemap>();
         for (int i = 0; i < w; i++)
         {
             for (int j = 0; j < h; j++)
@@ -39,9 +44,10 @@ public class OutsideCreator : MonoBehaviour
         for (int i = 0; i < flowerNum; i++)
         {
             tilemap.SetTile(new Vector3Int(UnityEngine.Random.Range(-w / 2, w / 2), UnityEngine.Random.Range(-h / 2, h / 2), 1), flowers[UnityEngine.Random.Range(0, flowers.Length)]);
+            createTree(UnityEngine.Random.Range(-w / 2, w / 2), UnityEngine.Random.Range(-h / 2, h / 2));
         }
 
-        createRoad();
+        createRoad(16);
 
         for (int i = 0; i < w; i++)
         {
@@ -55,30 +61,84 @@ public class OutsideCreator : MonoBehaviour
         
     }
 
-    bool[,] roadmap;
-    void createRoad()
+    List<Vector2> CatmulRom(Vector2 p0, Vector2 p1, Vector2 p2, Vector2 p3, int resolution, float alpha)
     {
-        Vector2Int[] nodes = new Vector2Int[] { new Vector2Int(0, UnityEngine.Random.Range(10, h-10)), new Vector2Int(w / 3, UnityEngine.Random.Range(10, h-10)), new Vector2Int(w / 3 * 2, UnityEngine.Random.Range(10, h-10)), new Vector2Int(w-10, UnityEngine.Random.Range(10, h-10)) };
-        
-        for (int i = 0; i < 3; i++)
+        List<Vector2> ret = new List<Vector2>();
+
+        float t0 = 0.0f;
+        float t1 = GetT(t0, p0, p1, alpha);
+        float t2 = GetT(t1, p1, p2, alpha);
+        float t3 = GetT(t2, p2, p3, alpha);
+
+        for (float t = t1; t < t2; t += ((t2 - t1) / (float)resolution))
         {
-            for (int x = nodes[i].x; x < nodes[i+1].x; x++)
+            Vector2 A1 = (t1 - t) / (t1 - t0) * p0 + (t - t0) / (t1 - t0) * p1;
+            Vector2 A2 = (t2 - t) / (t2 - t1) * p1 + (t - t1) / (t2 - t1) * p2;
+            Vector2 A3 = (t3 - t) / (t3 - t2) * p2 + (t - t2) / (t3 - t2) * p3;
+
+            Vector2 B1 = (t2 - t) / (t2 - t0) * A1 + (t - t0) / (t2 - t0) * A2;
+            Vector2 B2 = (t3 - t) / (t3 - t1) * A2 + (t - t1) / (t3 - t1) * A3;
+
+            Vector2 C = (t2 - t) / (t2 - t1) * B1 + (t - t1) / (t2 - t1) * B2;
+
+            ret.Add(C);
+        }
+        return ret;
+    }
+
+    float GetT(float t, Vector2 p0, Vector2 p1, float alpha)
+    {
+        float a = Mathf.Pow((p1.x - p0.x), 2.0f) + Mathf.Pow((p1.y - p0.y), 2.0f);
+        float b = Mathf.Pow(a, 0.5f);
+        float c = Mathf.Pow(b, alpha);
+
+        return (c + t);
+    }
+
+    bool[,] roadmap;
+    void createRoad(int nodenum)
+    {
+        Vector2Int[] nodes = new Vector2Int[nodenum];
+        nodes[0] = new Vector2Int(0, UnityEngine.Random.Range(10, h - 10));
+        for (int i = 1; i < nodenum; i++)
+        {
+            do
             {
-                int xrelative = x - nodes[i].x;
-                int ymax = nodes[i + 1].y - nodes[i].y;
-                int xmax = nodes[i + 1].x - nodes[i].x;
+                nodes[i] = new Vector2Int(i * w / nodenum - 10, nodes[i - 1].y + UnityEngine.Random.Range(-h / 6, h / 6));
+            } while (nodes[i].y < 10 || nodes[i].y > w - 10);
+        }
+
+        List<Vector2> points = new List<Vector2>();
+        for (int i = 3; i < nodenum; i++)
+        {
+            points.AddRange(CatmulRom(nodes[i - 3], nodes[i - 2], nodes[i - 1], nodes[i], 60, 0.4f));
+        }
+
+ 
+        for (int i = 0; i < points.Count - 1; i++)
+        {
+            for (int x = (int)points[i].x; x < points[i + 1].x; x++)
+            {
+                int xrelative = x - (int)points[i].x;
+                int ymax = (int)points[i + 1].y - (int)points[i].y;
+                int xmax = (int)points[i + 1].x - (int)points[i].x;
                 int yrelative = (int)(ymax * ((float)xrelative / xmax));
-                int y = nodes[i].y + yrelative;
+                int y = (int)points[i].y + yrelative;
                 for (int ri = 0; ri < 5; ri++)
                 {
                     for (int rj = 0; rj < 5; rj++)
                     {
-                        roadmap[x + ri, y + rj] = true;
-                        gtdm[x + ri, y + rj] = 0;
+                        if (x + ri >= 0 && x + ri < w && y + rj >= 0 && y + rj < h)
+                        {
+                            roadmap[x + ri, y + rj] = true;
+                            gtdm[x + ri, y + rj] = 0;
+                        }
                     }
                 }
             }
         }
+        
+
 
         for (int i = 0; i < w; i++)
         {
@@ -198,6 +258,18 @@ public class OutsideCreator : MonoBehaviour
         if (i < w - 1 && j < h - 1 && !edgeCheck(i + 1, j + 1) && !(((b & 1) == 0) == ((gtdm[i + 1, j + 1] & 4) == 0))) return false;
 
         return true;
+    }
+
+    void createTree(int x, int y)
+    {
+        tilemap.SetTile(new Vector3Int(x, y, 1), treeTrunk);
+        for (int i = 0; i < 3; i++)
+        {
+            for (int j = 0; j < 3; j++)
+            {
+                FGTileMap.SetTile(new Vector3Int(x - 1 + j, y + 2 - i, h*100-y*100 + x*10 + i), treeTiles[i * 3 + j]);
+            }
+        }
     }
 
     // Update is called once per frame

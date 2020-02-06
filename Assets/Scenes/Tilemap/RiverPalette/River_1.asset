@@ -10,9 +10,9 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 13312, guid: 0000000000000000e000000000000000, type: 0}
-  m_Name: Village_Tileset_363
+  m_Name: River_1
   m_EditorClassIdentifier: 
-  m_Sprite: {fileID: 2029041282950414242, guid: a3b73ebb5207cec4cb58711bc1b431c6,
+  m_Sprite: {fileID: -7185255062576871469, guid: e9c8896186856ee4a8b60ee510a6fd82,
     type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_Transform:
@@ -34,4 +34,4 @@ MonoBehaviour:
     e33: 1
   m_InstancedGameObject: {fileID: 0}
   m_Flags: 1
-  m_ColliderType: 1
+  m_ColliderType: 0
