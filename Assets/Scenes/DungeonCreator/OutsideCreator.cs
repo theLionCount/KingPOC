@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Tilemaps;
@@ -28,7 +29,7 @@ public class OutsideCreator : MonoBehaviour
             {
                 byte current;
                 do
-                    current = (byte)Random.Range(0, 16);
+                    current = (byte)UnityEngine.Random.Range(0, 16);
                 while (!isByteOk(i, j, current));
             
                 gtdm[i, j] = current;
@@ -37,7 +38,7 @@ public class OutsideCreator : MonoBehaviour
 
         for (int i = 0; i < flowerNum; i++)
         {
-            tilemap.SetTile(new Vector3Int(Random.Range(-w / 2, w / 2), Random.Range(-h / 2, h / 2), 1), flowers[Random.Range(0, flowers.Length)]);
+            tilemap.SetTile(new Vector3Int(UnityEngine.Random.Range(-w / 2, w / 2), UnityEngine.Random.Range(-h / 2, h / 2), 1), flowers[UnityEngine.Random.Range(0, flowers.Length)]);
         }
 
         createRoad();
@@ -46,7 +47,8 @@ public class OutsideCreator : MonoBehaviour
         {
             for (int j = 0; j < h; j++)
             {
-                Tile t = gtdm[i, j] == 0 && Random.Range(0, 10) == 0 ? specGlass[Random.Range(0, specGlass.Length)] : grassToDarkGrassTiles[gtdm[i, j]];
+                Tile t = gtdm[i, j] == 0 && UnityEngine.Random.Range(0, 10) == 0 ? specGlass[UnityEngine.Random.Range(0, specGlass.Length)] : grassToDarkGrassTiles[gtdm[i, j]];
+                if (roadmap[i, j]) t = grassToDirtTiles[gtdm[i, j]];
                 tilemap.SetTile(new Vector3Int(i - w / 2, j - h / 2, 0), t);
             }
         }
@@ -56,7 +58,7 @@ public class OutsideCreator : MonoBehaviour
     bool[,] roadmap;
     void createRoad()
     {
-        Vector2Int[] nodes = new Vector2Int[] { new Vector2Int(0, Random.Range(0, h)), new Vector2Int(w / 3, Random.Range(0, h)), new Vector2Int(w / 3 * 2, Random.Range(0, h)), new Vector2Int(0, Random.Range(0, h)) };
+        Vector2Int[] nodes = new Vector2Int[] { new Vector2Int(0, UnityEngine.Random.Range(10, h-10)), new Vector2Int(w / 3, UnityEngine.Random.Range(10, h-10)), new Vector2Int(w / 3 * 2, UnityEngine.Random.Range(10, h-10)), new Vector2Int(w-10, UnityEngine.Random.Range(10, h-10)) };
         
         for (int i = 0; i < 3; i++)
         {
@@ -86,8 +88,31 @@ public class OutsideCreator : MonoBehaviour
                 {
                     byte current;
                     do
-                        current = (byte)Random.Range(0, 16);
-                    while (!isByteOkFull(i, j, current));
+                        current = (byte)UnityEngine.Random.Range(0, 16);
+                    while (!isByteOkFullRoadEdge(i, j, current, isNextToRoad));
+                    gtdm[i, j] = current;
+                }
+            }
+        }
+
+        for (int i = 0; i < w; i++)
+        {
+            for (int j = 0; j < h; j++)
+            {
+                if (roadmap[i, j]) gtdm[i, j] = 15;
+            }
+        }
+
+        for (int i = 0; i < w; i++)
+        {
+            for (int j = 0; j < h; j++)
+            {
+                if (isOnEdgeOfRoad(i, j))
+                {
+                    byte current;
+                    do
+                        current = (byte)UnityEngine.Random.Range(0, 16);
+                    while (!isByteOkFullRoadEdge(i, j, current, isOnEdgeOfRoad));
                     gtdm[i, j] = current;
                 }
             }
@@ -101,15 +126,34 @@ public class OutsideCreator : MonoBehaviour
         if (i < w - 1 && roadmap[i + 1, j]) return true;
         if (j > 0 && roadmap[i, j - 1]) return true;
         if (j < h - 1 && roadmap[i, j + 1]) return true;
+        if (i > 0 && j > 0 && roadmap[i - 1, j - 1]) return true;
+        if (i > 0 && j < h - 1 && roadmap[i - 1, j + 1]) return true;
+        if (i < w - 1 && j > 0 && roadmap[i + 1, j - 1]) return true;
+        if (i < w - 1 && j < h - 1 && roadmap[i + 1, j + 1]) return true;
+
+        return false;
+    }
+
+    bool isOnEdgeOfRoad(int i, int j)
+    {
+        if (!roadmap[i, j]) return false;
+        if (i > 0 && !roadmap[i - 1, j]) return true;
+        if (i < w - 1 && !roadmap[i + 1, j]) return true;
+        if (j > 0 && !roadmap[i, j - 1]) return true;
+        if (j < h - 1 && !roadmap[i, j + 1]) return true;
+        if (i > 0 && j > 0 && !roadmap[i - 1, j - 1]) return true;
+        if (i > 0 && j < h - 1 && !roadmap[i - 1, j + 1]) return true;
+        if (i < w - 1 && j > 0 && !roadmap[i + 1, j - 1]) return true;
+        if (i < w - 1 && j < h - 1 && !roadmap[i + 1, j + 1]) return true;
 
         return false;
     }
 
     bool isByteOk(int i, int j, byte b)
     {
-        if (i > 0 && !(((b & 4) == 0) == ((gtdm[i-1, j] & 2) == 0) && ((b & 8) == 0) == ((gtdm[i-1, j] & 1) == 0))) return false;
-        
-        if (j > 0 && !(((b & 2) == 0) == ((gtdm[i, j-1] & 1) == 0) && ((b & 4) == 0) == ((gtdm[i, j-1] & 8) == 0))) return false;
+        if (i > 0 && !(((b & 4) == 0) == ((gtdm[i - 1, j] & 2) == 0) && ((b & 8) == 0) == ((gtdm[i - 1, j] & 1) == 0))) return false;
+
+        if (j > 0 && !(((b & 2) == 0) == ((gtdm[i, j - 1] & 1) == 0) && ((b & 4) == 0) == ((gtdm[i, j - 1] & 8) == 0))) return false;
 
         return true;
     }
@@ -123,6 +167,35 @@ public class OutsideCreator : MonoBehaviour
         if (j > 0 && !(((b & 2) == 0) == ((gtdm[i, j - 1] & 1) == 0) && ((b & 4) == 0) == ((gtdm[i, j - 1] & 8) == 0))) return false;
 
         if (j < h - 1 && !(((b & 1) == 0) == ((gtdm[i, j + 1] & 2) == 0) && ((b & 8) == 0) == ((gtdm[i, j + 1] & 4) == 0))) return false;
+
+        if (i > 0 && j > 0 && !(((b & 8) == 0) == ((gtdm[i - 1, j - 1] & 2) == 0))) return false;
+
+        if (i > 0 && j < h - 1 && !(((b & 4) == 0) == ((gtdm[i - 1, j + 1] & 1) == 0))) return false;
+
+        if (i < w - 1 && j > 0 && !(((b & 1) == 0) == ((gtdm[i + 1, j - 1] & 4) == 0))) return false;
+
+        if (i < w - 1 && j < h - 1 && !(((b & 2) == 0) == ((gtdm[i + 1, j + 1] & 8) == 0))) return false;
+
+        return true;
+    }
+
+    bool isByteOkFullRoadEdge(int i, int j, byte b, Func<int,int, bool> edgeCheck)
+    {
+        if (i > 0 && !edgeCheck(i - 1, j) && !(((b & 4) == 0) == ((gtdm[i - 1, j] & 2) == 0) && ((b & 8) == 0) == ((gtdm[i - 1, j] & 1) == 0))) return false;
+
+        if (i < w - 1 && !edgeCheck(i + 1, j) && !(((b & 2) == 0) == ((gtdm[i + 1, j] & 4) == 0) && ((b & 1) == 0) == ((gtdm[i + 1, j] & 8) == 0))) return false;
+
+        if (j > 0 && !edgeCheck(i, j - 1) && !(((b & 2) == 0) == ((gtdm[i, j - 1] & 1) == 0) && ((b & 4) == 0) == ((gtdm[i, j - 1] & 8) == 0))) return false;
+
+        if (j < h - 1 && !edgeCheck(i, j + 1) && !(((b & 1) == 0) == ((gtdm[i, j + 1] & 2) == 0) && ((b & 8) == 0) == ((gtdm[i, j + 1] & 4) == 0))) return false;
+
+        if (i > 0 && j > 0 && !edgeCheck(i - 1, j - 1) && !(((b & 4) == 0) == ((gtdm[i - 1, j - 1] & 1) == 0))) return false;
+
+        if (i > 0 && j < h - 1 && !edgeCheck(i - 1, j + 1) && !(((b & 8) == 0) == ((gtdm[i - 1, j + 1] & 2) == 0))) return false;
+
+        if (i < w - 1 && j > 0 && !edgeCheck(i + 1, j - 1) && !(((b & 2) == 0) == ((gtdm[i + 1, j - 1] & 8) == 0))) return false;
+
+        if (i < w - 1 && j < h - 1 && !edgeCheck(i + 1, j + 1) && !(((b & 1) == 0) == ((gtdm[i + 1, j + 1] & 4) == 0))) return false;
 
         return true;
     }
