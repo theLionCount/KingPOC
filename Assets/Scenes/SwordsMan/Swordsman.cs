@@ -136,7 +136,11 @@ public class Swordsman : MonoBehaviour, IKillable
     {
         Vector2 horizontal = new Vector2(to.x, 0);
         Vector2 vertical = new Vector2(0, to.y);
-        if (rb2d.Cast(horizontal, contactFilter, hitBuffer, horizontal.magnitude * 3f) <= 0) rb2d.position += horizontal;
-        if (rb2d.Cast(vertical, contactFilter, hitBuffer, horizontal.magnitude * 3f) <= 0) rb2d.position += vertical;
+
+        float magnitudeAdjustment = rb2d.Cast(horizontal, contactFilter, hitBuffer, 0) > 0 ? 3f : 2f;
+        
+
+        if (rb2d.Cast(horizontal, contactFilter, hitBuffer, horizontal.magnitude * magnitudeAdjustment) <= 0) rb2d.position += horizontal;
+        if (rb2d.Cast(vertical, contactFilter, hitBuffer, vertical.magnitude * magnitudeAdjustment) <= 0) rb2d.position += vertical;
     }
 }

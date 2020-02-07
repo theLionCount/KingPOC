@@ -29,6 +29,7 @@ public class SwordsmanController : MonoBehaviour
         {
             List<Vector3> pss = new List<Vector3>() { p + new Vector3(1.2f, 0, 0), p + new Vector3(-1.2f, 0, 0), p + new Vector3(0, 1.2f, 0), p + new Vector3(0, -1.2f, 0) };
             Vector3 c = pss.First(v => (v - transform.position).magnitude == pss.Min(t => (t - transform.position).magnitude));
+            c.z = transform.position.z;
 
 
             Vector3 dir = (c - transform.position).normalized;
