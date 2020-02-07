@@ -47,7 +47,7 @@ public class OutsideCreator : MonoBehaviour
             createTree(UnityEngine.Random.Range(-w / 2, w / 2), UnityEngine.Random.Range(-h / 2, h / 2));
         }
 
-        createRoad(16);
+        createRoad(60);
 
         for (int i = 0; i < w; i++)
         {
