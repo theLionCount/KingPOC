@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
@@ -27,6 +28,7 @@ public class OutsideCreator : MonoBehaviour
 
     GameObject player;
 
+
     // Start is called before the first frame update
     void Start()
     {
@@ -39,23 +41,7 @@ public class OutsideCreator : MonoBehaviour
 
         FGTileMap = gameObject.transform.Find("FGTilemap").GetComponent<Tilemap>();
 
-
         repaint();
-
-        //for (int i = 0; i < flowerNum; i++)
-        //{
-        //    Vector2Int treepos;
-        //    do { treepos = new Vector2Int(UnityEngine.Random.Range(-w / 2, w / 2), UnityEngine.Random.Range(-h / 2, h / 2)); } while (owc.Roadmap(treepos.x + w / 2, treepos.y + h / 2, ox, oy) || owc.isNextToRoad(treepos.x + w / 2, treepos.y + h / 2, ox, oy) || owc.isOnEdgeOfRoad(treepos.x + w / 2, treepos.y + h / 2, ox, oy));
-        //    createTree(treepos.x, treepos.y);
-        //   // tilemap.SetTile(new Vector3Int(treepos.x, treepos.y, 0), flowers[0]);
-        //    tilemap.SetTile(new Vector3Int(UnityEngine.Random.Range(-w / 2, w / 2), UnityEngine.Random.Range(-h / 2, h / 2), 1), flowers[UnityEngine.Random.Range(0, flowers.Length)]);
-
-        //}
-
-        //foreach (var item in verticalBridgeMap.cellBounds.allPositionsWithin)
-        //{
-
-        //} 
 
     }
 
@@ -73,6 +59,10 @@ public class OutsideCreator : MonoBehaviour
                 if (owc.Roadmap(i, j, ox, oy)) t = grassToDirtTiles[owc.GTDM(i, j, ox, oy)];
                 tilemap.SetTile(new Vector3Int(i, j, 0), t);
             }
+        }
+        foreach (var item in owc.getTrees(ox,oy))
+        {
+            createTree(item.x - ox, item.y - oy);
         }
     }
 

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class OutsideWorldCreator : MonoBehaviour
@@ -8,6 +9,9 @@ public class OutsideWorldCreator : MonoBehaviour
     byte[,] gtdm;
     public int w, h;
     public int flowerNum;
+    public int tileW, tileH;
+    List<Vector2Int>[,] trees;
+    MapModule mapModule;
 
     public byte GTDM(int x, int y, int ox, int oy)
     {
@@ -18,8 +22,17 @@ public class OutsideWorldCreator : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        mapModule = gameObject.GetComponent<MapModule>();
         gtdm = new byte[w, h];
         roadmap = new bool[w, h];
+        trees = new List<Vector2Int>[w / tileW, h / tileH];
+        for (int i = 0; i < w / tileW; i++)
+        {
+            for (int j = 0; j < h / tileH; j++)
+            {
+                trees[i, j] = new List<Vector2Int>();
+            }
+        }
 
         for (int i = 0; i < w; i++)
         {
@@ -35,7 +48,33 @@ public class OutsideWorldCreator : MonoBehaviour
         }
 
         createRoad(10);
+        createTrees();
     }
+
+    void createTrees()
+    {
+        for (int i = 0; i < flowerNum; i++)
+        {
+            Vector2Int treepos;
+            do { treepos = new Vector2Int(UnityEngine.Random.Range(1, w - 1), UnityEngine.Random.Range(1, h - 1)); } while (roadmap[treepos.x, treepos.y] || isNextToRoad(treepos.x, treepos.y) || isOnEdgeOfRoad(treepos.x, treepos.y));
+            trees[treepos.x / tileW, treepos.y / tileH].Add(treepos);
+            mapModule.map[treepos.x - 1, treepos.y - 1] = true;
+            mapModule.map[treepos.x - 1, treepos.y] = true;
+            mapModule.map[treepos.x - 1, treepos.y + 1] = true;
+            mapModule.map[treepos.x, treepos.y - 1] = true;
+            mapModule.map[treepos.x, treepos.y] = true;
+            mapModule.map[treepos.x, treepos.y + 1] = true;
+            mapModule.map[treepos.x + 1, treepos.y - 1] = true;
+            mapModule.map[treepos.x + 1, treepos.y] = true;
+            mapModule.map[treepos.x + 1, treepos.y + 1] = true;
+
+        }
+    }
+
+    
+    
+
+    public List<Vector2Int> getTrees(int ox, int oy) => trees[ox / tileW, oy / tileH];
 
     // Update is called once per frame
     void Update()
