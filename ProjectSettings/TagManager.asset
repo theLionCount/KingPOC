@@ -48,3 +48,6 @@ TagManager:
   - name: FG
     uniqueID: 2625993313
     locked: 0
+  - name: FullBg
+    uniqueID: 2682690873
+    locked: 0

@@ -10,6 +10,7 @@ public class StaticDungeon : MonoBehaviour, IMapEnabled
 {
     MapModule map;
     Tilemap tilemap;
+    Tilemap FGTilemap;
     TileProvider tp;
     public int w, h, floorIreggularityNum;
     public Tile defaultFloor;
@@ -34,9 +35,27 @@ public class StaticDungeon : MonoBehaviour, IMapEnabled
         map = GetComponent<MapModule>();
         tp = GameObject.Find("TileProvider").GetComponent<TileProvider>();
         tilemap = gameObject.transform.Find("Tilemap").GetComponent<Tilemap>();
+        FGTilemap = gameObject.transform.Find("ForeGround").GetComponent<Tilemap>();
         BoundsInt bounds = tilemap.cellBounds;
         var tiles = tilemap.GetTilesBlock(bounds);
         int c = 0;
+        for (int i = 0; i < bounds.size.y; i++)
+        {
+            for (int j = 0; j < bounds.size.x; j++)
+            {
+                for (int k = 0; k < bounds.size.z; k++)
+                {
+                    if (tiles[c] != null && tp.tiles[tiles[c].name].colliderType != Tile.ColliderType.None)
+                    {
+                        map.map[bounds.x + j, bounds.y + i] = true;
+                    }
+                    c++;
+                }
+            }
+        }
+        bounds = FGTilemap.cellBounds;
+        tiles = FGTilemap.GetTilesBlock(bounds);
+        c = 0;
         for (int i = 0; i < bounds.size.y; i++)
         {
             for (int j = 0; j < bounds.size.x; j++)
