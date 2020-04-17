@@ -4,13 +4,13 @@ using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
-    Swordsman body;
+    CharacterBase body;
     bool lmb;
 
     // Start is called before the first frame update
     void Start()
     {
-        body = gameObject.GetComponent<Swordsman>();
+        body = gameObject.GetComponent<CharacterBase>();
     }
 
     void FixedUpdate()

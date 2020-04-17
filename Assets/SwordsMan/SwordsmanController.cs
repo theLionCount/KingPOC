@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class SwordsmanController : MonoBehaviour
 {
-    Swordsman body;
+    CharacterBase body;
     long time;
     float countdown;
     public float reactionTime;
@@ -19,7 +19,7 @@ public class SwordsmanController : MonoBehaviour
     // Start is called before the first frame update
     protected virtual void Start()
     {
-        body = gameObject.GetComponent<Swordsman>();
+        body = gameObject.GetComponent<CharacterBase>();
         avoider = gameObject.GetComponentInChildren<MeleeAvoider>();
         owc = GameObject.Find("World").GetComponent<MapModule>();
         routeProvider = new RouteProvider();

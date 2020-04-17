@@ -5,13 +5,13 @@ using UnityEngine.UIElements;
 
 public class HPCounter : MonoBehaviour
 {
-    public Swordsman body;
+    public SwordsMan body;
 
 
     // Start is called before the first frame update
     void Start()
     {
-        body = GetComponentInParent<Swordsman>();
+        body = GetComponentInParent<SwordsMan>();
 
     }
 
