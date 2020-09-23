@@ -4,5 +4,5 @@ using UnityEngine;
 
 public interface IKillable
 { 
-    void damage(float dmg, float stun, Vector2 dir, float knockback);
+    void damage(float dmg, float stun, Vector2 dir, float knockback, IKillable idiot);
 }

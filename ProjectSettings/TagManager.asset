@@ -5,6 +5,8 @@ TagManager:
   serializedVersion: 2
   tags:
   - MeeleEnemy
+  - DungeonRoom
+  - Corridor
   layers:
   - Default
   - TransparentFX
@@ -20,8 +22,8 @@ TagManager:
   - Walls
   - MeleeCollider
   - AreaTriggers
-  - 
-  - 
+  - Projectile
+  - EnemyProjectile
   - 
   - 
   - 

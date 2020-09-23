@@ -16,7 +16,7 @@ public class Arrow : MonoBehaviour
     }
 
     // Update is called once per frame
-    void Update()
+    void FixedUpdate()
     {
         transform.position += v;
         transform.rotation = Quaternion.Euler(0, 0, v.x > 0 ? -(float)Vector2.Angle(new Vector2(0, 1), v) : (float)Vector2.Angle(new Vector2(0, 1), v));
@@ -25,7 +25,7 @@ public class Arrow : MonoBehaviour
     private void OnCollisionEnter2D(Collision2D collision)
     {
         var killable = collision.gameObject.GetComponent<IKillable>();
-        if (killable != null) killable.damage(0.5f, 15, v, 0.12f);
+        if (killable != null) killable.damage(0.5f, 15, v, 0.12f, null);
         Destroy(gameObject);
     }
 }

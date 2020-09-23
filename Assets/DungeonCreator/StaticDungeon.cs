@@ -8,34 +8,45 @@ using UnityEngine.Tilemaps;
 
 public class StaticDungeon : MonoBehaviour, IMapEnabled
 {
-    MapModule map;
-    Tilemap tilemap;
-    Tilemap FGTilemap;
-    TileProvider tp;
+    protected MapModule map;
+    protected Tilemap tilemap;
+    protected Tilemap FGTilemap;
+    protected Tilemap FullFGTilemap;
+    protected TileProvider tp;
     public int w, h, floorIreggularityNum;
     public Tile defaultFloor;
     public Tile defaultVoid;
-    public GameObject testObj;
 
     List<TilemapLoader> floors = new List<TilemapLoader>();
 
-    public int getH()
+    public virtual int getH()
     {
         return w;
     }
 
-    public int getW()
+    public virtual int getW()
     {
         return h;
     }
 
     // Start is called before the first frame update
-    void Start()
+    protected virtual void Start()
+    {
+        preSetup();
+        postSetup();
+    }
+
+    protected virtual void preSetup()
     {
         map = GetComponent<MapModule>();
         tp = GameObject.Find("TileProvider").GetComponent<TileProvider>();
         tilemap = gameObject.transform.Find("Tilemap").GetComponent<Tilemap>();
-        FGTilemap = gameObject.transform.Find("ForeGround").GetComponent<Tilemap>();
+        FGTilemap = gameObject.transform.Find("Foreground").GetComponent<Tilemap>();
+        FullFGTilemap = gameObject.transform.Find("FullFG").GetComponent<Tilemap>();
+    }
+
+    protected virtual void postSetup()
+    {
         BoundsInt bounds = tilemap.cellBounds;
         var tiles = tilemap.GetTilesBlock(bounds);
         int c = 0;
@@ -94,7 +105,7 @@ public class StaticDungeon : MonoBehaviour, IMapEnabled
     }
 
     // Update is called once per frame
-    void Update()
+    protected virtual void Update()
     {
         
     }

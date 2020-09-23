@@ -8,6 +8,7 @@ public class Sword : MonoBehaviour
     public float stun = 20;
     public float kb = 0.14f;
     public float dmg = 0.5f;
+    IKillable myIdiot;
 
 
    // public Text
@@ -15,7 +16,7 @@ public class Sword : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        
+        myIdiot = GetComponentInParent<IKillable>();
     }
 
     // Update is called once per frame
@@ -27,6 +28,6 @@ public class Sword : MonoBehaviour
     private void OnCollisionEnter2D(Collision2D collision)
     {
         var killable = collision.gameObject.GetComponent<IKillable>();
-        if (killable != null) killable.damage(dmg, stun, collision.gameObject.transform.position - gameObject.transform.position, kb);
+        if (killable != null) killable.damage(dmg, stun, collision.gameObject.transform.position - gameObject.transform.position, kb, myIdiot);
     }
 }

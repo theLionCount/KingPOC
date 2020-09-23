@@ -8,7 +8,6 @@ public class BowmanController : MonoBehaviour
     CharacterBase body;
 
     public float reactionTime;
-    bool atTarget;
     Vector3 target;
     MeleeAvoider avoider;
     MapModule owc;
@@ -49,18 +48,14 @@ public class BowmanController : MonoBehaviour
         }
         else
         {
-           // List<Vector3> pss = new List<Vector3>() { target };
-            lastOK = target;
-            Vector3 c = lastOK;
+            Vector3 c = target;
             c.z = transform.position.z;
-            Vector3 ot = c;
-            var route = routeProvider.nextTarget(transform.position, c); //  owc.getRoute(new Vector2Int((int)transform.position.x, (int)transform.position.y), new Vector2Int((int)c.x, (int)c.y));
+            var route = routeProvider.nextTarget(transform.position, c); 
 
             if ((c - transform.position).magnitude > 2) c = new Vector3(route.x + 0.5f, route.y + 0.5f, c.z);
 
             Vector3 dir = (c - transform.position).normalized;
 
-            //Vector3 dir = (target - transform.position).normalized;
             body.move(dir);
         }
 

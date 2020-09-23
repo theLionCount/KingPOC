@@ -25,6 +25,8 @@ public class CharacterBase : MonoBehaviour, IKillable
     Color defaultColor;
     SpriteRenderer renderer;
 
+    bool shielding;
+
     void OnEnable()
     {
         rb2d = GetComponent<Rigidbody2D>();
@@ -56,20 +58,29 @@ public class CharacterBase : MonoBehaviour, IKillable
         }
         else
         {
-
+            
             renderer.material.color = defaultColor;
             animator.SetBool("Stunned", false);
             if (health > 0)
             {
+                if (!animator.GetCurrentAnimatorStateInfo(0).IsTag("slice") && !animator.GetCurrentAnimatorStateInfo(0).IsTag("shield")) movement();
+
                 if (!animator.GetCurrentAnimatorStateInfo(0).IsTag("slice"))
                 {
-                    movement();
                     animator.SetBool("Recovered", true);
                 }
                 else
                     animator.SetBool("Recovered", false);
                 if (sliceing) sliceing = false;
                 else setNoSlice();
+
+                if (!animator.GetCurrentAnimatorStateInfo(0).IsTag("shield"))
+                {
+                    animator.SetBool("ShieldRecovered", true);
+                }
+                else
+                    animator.SetBool("ShieldRecovered", false);
+                animator.SetBool("Shield", shielding);
             }
             else
             {
@@ -103,7 +114,12 @@ public class CharacterBase : MonoBehaviour, IKillable
 
     public void move(Vector2 dir)
     {
-        v = dir;
+        v = shielding ? Vector2.zero : dir;
+    }
+
+    public void shield(bool s)
+    {
+        shielding = s;
     }
 
     void direction()
@@ -119,17 +135,27 @@ public class CharacterBase : MonoBehaviour, IKillable
         animator.SetBool("MoveV", v.x != 0);
         animator.SetBool("MoveUp", v.y > 0);
         animator.SetBool("MoveDown", v.y < 0);
-
-        mirrored = v.x < 0;
+        if (v.x != 0 && !sliceing) mirrored = v.x < 0;
 
         collidedMove(v * speed);
     }
 
-    public void damage(float dmg, float stun, Vector2 dir, float knockback)
+    public void damage(float dmg, float stun, Vector2 dir, float knockback, IKillable idiot)
     {
-        stunned = stun;
-        knockbackV = dir.normalized * knockback;
-        health -= dmg;
+        if (shielding)
+            dir.GetType();
+
+        if (!shielding)
+        {
+            stunned = stun;
+            knockbackV = dir.normalized * knockback;
+            health -= dmg;
+        }
+        else if (idiot != null)
+        {
+            idiot.damage(0, stun / 1.2f, -dir, knockback, this);
+
+        }
     }
 
     public void collidedMove(Vector2 to)

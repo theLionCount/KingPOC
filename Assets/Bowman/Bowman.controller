@@ -291,7 +291,7 @@ AnimatorState:
   m_MirrorParameterActive: 0
   m_CycleOffsetParameterActive: 0
   m_TimeParameterActive: 0
-  m_Motion: {fileID: 7400000, guid: 66cc1b833d54cd140aeb4d36b8a0f7dd, type: 2}
+  m_Motion: {fileID: 7400000, guid: 49d84a3ae99805340bb208d8f046c333, type: 2}
   m_Tag: slice
   m_SpeedParameter: 
   m_MirrorParameter: 
@@ -353,7 +353,7 @@ AnimatorController:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: BowmanPlayer
+  m_Name: Bowman
   serializedVersion: 5
   m_AnimatorParameters:
   - m_Name: MoveUp
@@ -568,7 +568,7 @@ AnimatorState:
   m_MirrorParameterActive: 0
   m_CycleOffsetParameterActive: 0
   m_TimeParameterActive: 0
-  m_Motion: {fileID: 7400000, guid: 6fa3474a9c1cc6c4aa110caf1352ef78, type: 2}
+  m_Motion: {fileID: 7400000, guid: d5a0c46a627e8324c93bd0d1c12d8fde, type: 2}
   m_Tag: 
   m_SpeedParameter: 
   m_MirrorParameter: 

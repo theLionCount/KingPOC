@@ -38,5 +38,6 @@ public class PlayerController : MonoBehaviour
         {
             lmb = false;
         }
+        body.shield(Input.GetMouseButton(1));
     }
 }

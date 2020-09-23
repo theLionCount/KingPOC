@@ -16,7 +16,7 @@ public class PlayerSightlineer : MonoBehaviour
 
     // Start is called before the first frame update
     void Start()
-    {
+    { 
         sightlines = new bool[w, h];
         player = GameObject.Find("Player");
         rb2d = player.GetComponent<Rigidbody2D>();

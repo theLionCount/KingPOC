@@ -32,13 +32,17 @@ public class MapModule : MonoBehaviour
     public List<Vector2Int> getRoute(Vector2 pos, Vector2 target)
     {
 
-      //  System.Diagnostics.Debug.WriteLine("getroute Started");
+        //System.Diagnostics.Debug.WriteLine("getroute Started");
         List<Vector3> nodes = new List<Vector3>();
         List<Vector3> avaible = new List<Vector3>();
         Dictionary<Vector2Int, Vector3> route = new Dictionary<Vector2Int, Vector3>();
         nodes.Add(new Vector3(pos.x, pos.y, 0));
         if (target == pos) return new List<Vector2Int>() { new Vector2Int((int)target.x, (int)target.y), new Vector2Int((int)target.x, (int)target.y) };
-        if (map[(int)target.x, (int)target.y]) return null;
+        if (map[(int)target.x, (int)target.y])
+        {
+            //System.Diagnostics.Debug.WriteLine("getroute ended cos target is no good: " + target.x.ToString() + target.y.ToString());
+            return null;
+        }
         bool rdy = false;
         int count = 0, length = 0;
         System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
@@ -54,8 +58,8 @@ public class MapModule : MonoBehaviour
             if (next.x == target.x && next.y == target.y) rdy = true;
             count++;
         }
-       // System.Diagnostics.Debug.WriteLine("getRoute ended: " + count.ToString());
-        //sw.Stop(); System.Diagnostics.Debug.WriteLine("getRoute length = " + sw.Elapsed.Milliseconds.ToString());
+        //System.Diagnostics.Debug.WriteLine("getRoute ended: " + count.ToString());
+        sw.Stop(); //System.Diagnostics.Debug.WriteLine("getRoute length = " + sw.Elapsed.Milliseconds.ToString());
         if (rdy)
         {
             List<Vector2Int> ret = new List<Vector2Int>();
@@ -107,6 +111,8 @@ public class MapModule : MonoBehaviour
     {
         if (!responseQueue.Contains(response)) 
         {
+            //if (response.route == null)
+                //System.Diagnostics.Debug.WriteLine("wtf is happening right now?");
             response.rdy = false;
             lock (lck) responseQueue.Add(response); 
         }
@@ -135,20 +141,20 @@ public class MapModule : MonoBehaviour
                 {
                     current.started = true;
                     current.rdy = false;
-                    System.Diagnostics.Debug.WriteLine("route locked");
+                    //System.Diagnostics.Debug.WriteLine("route locked");
                 }
-                System.Diagnostics.Debug.WriteLine("modifying route from processing");
+                //System.Diagnostics.Debug.WriteLine("modifying route from processing");
                 current.route = getRoute(new Vector2Int((int)current.start.x,(int)current.start.y), new Vector2Int((int)current.end.x, (int)current.end.y));
-                System.Diagnostics.Debug.WriteLine("modifyied route from processing");
-                if (current.route[0] != current.start)
-                {
-                    System.Diagnostics.Debug.WriteLine("wut?");
-                }
+                //System.Diagnostics.Debug.WriteLine("modifyied route from processing");
+                //if (current.route[0] != current.start)
+                //{
+                //    //System.Diagnostics.Debug.WriteLine("wut?");
+                //}
                 lock (current.lck)
                 {
                     current.started = false;
                     current.rdy = true;
-                    System.Diagnostics.Debug.WriteLine("route open");
+                    //System.Diagnostics.Debug.WriteLine("route open");
                 }
             }
         }
